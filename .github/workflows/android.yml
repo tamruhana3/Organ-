@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,14 +22,24 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew || true
+    - name: Restore Keystore and Environment
+      run: |
+        if [ -f "debug.keystore.base64" ]; then
+          base64 -d debug.keystore.base64 > debug.keystore
+        fi
+        if [ ! -f "debug.keystore" ]; then
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+        fi
+        if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+          cp .env.example .env
+        fi
+        chmod +x gradlew
 
     - name: Run Unit Tests
-      run: gradle :app:testDebugUnitTest --no-daemon
+      run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
 
     - name: Build Debug APK
-      run: gradle :app:assembleDebug --no-daemon
+      run: ./gradlew assembleDebug --no-daemon --stacktrace
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
