@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="netforge_accent">#7C5CFF</color>
+    <color name="netforge_ember">#FF6B4A</color>
+    <color name="netforge_ink">#0A0A0E</color>
+    <color name="netforge_paper">#16161D</color>
+    <color name="netforge_paper2">#1E1E28</color>
+    <color name="netforge_moss">#34D399</color>
+    <color name="netforge_rust">#F87171</color>
+    <color name="netforge_amber">#FBBF24</color>
+    <color name="netforge_chalk">#F4F4F6</color>
+    <color name="netforge_slate">#A1A1AA</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
