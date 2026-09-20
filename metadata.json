@@ -1,6 +1,6 @@
 {
-  "name": "NetForge",
-  "description": "Private routing, plainly done",
+  "name": "Flex Net",
+  "description": "Secure networking suite with multi-protocol VPN, SSL tunnel, and payload injector",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

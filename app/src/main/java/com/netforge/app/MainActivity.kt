@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 NetForgeTheme(isDusk = isDusk) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
-                        color = NetForgeInk
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.background
                     ) {
                         val startDest = if (hasCompletedOnboarding == true) Routes.HOME else Routes.INTRO
                         NetForgeNavHost(

@@ -11,30 +11,30 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DuskColorScheme = darkColorScheme(
-    primary = NetForgeAccent,
-    onPrimary = NetForgeChalk,
-    primaryContainer = NetForgePaper2,
-    onPrimaryContainer = NetForgeChalk,
-    secondary = NetForgeEmber,
-    onSecondary = NetForgeChalk,
-    background = NetForgeInk,
-    onBackground = NetForgeChalk,
-    surface = NetForgePaper,
-    onSurface = NetForgeChalk,
-    surfaceVariant = NetForgePaper2,
+    primary = FlexGreenPrimary,
+    onPrimary = androidx.compose.ui.graphics.Color.White,
+    primaryContainer = FlexGreenDark,
+    onPrimaryContainer = androidx.compose.ui.graphics.Color.White,
+    secondary = FlexGreenBadge,
+    onSecondary = androidx.compose.ui.graphics.Color.White,
+    background = FlexScreenBackgroundDark,
+    onBackground = FlexTextLight,
+    surface = FlexCardBackgroundDark,
+    onSurface = FlexTextLight,
+    surfaceVariant = FlexBorderDark,
     onSurfaceVariant = NetForgeSlate,
-    outline = NetForgeBorder,
+    outline = FlexBorderDark,
     error = NetForgeRust,
-    onError = NetForgeChalk
+    onError = androidx.compose.ui.graphics.Color.White
 )
 
 private val DawnColorScheme = lightColorScheme(
-    primary = NetForgeAccent,
-    onPrimary = NetForgeChalk,
-    primaryContainer = DawnPaper2,
-    onPrimaryContainer = DawnText,
-    secondary = NetForgeEmber,
-    onSecondary = NetForgeChalk,
+    primary = FlexGreenPrimary,
+    onPrimary = androidx.compose.ui.graphics.Color.White,
+    primaryContainer = FlexGreenLight,
+    onPrimaryContainer = FlexGreenDark,
+    secondary = FlexGreenBadge,
+    onSecondary = androidx.compose.ui.graphics.Color.White,
     background = DawnBackground,
     onBackground = DawnText,
     surface = DawnPaper,
@@ -43,7 +43,7 @@ private val DawnColorScheme = lightColorScheme(
     onSurfaceVariant = DawnMuted,
     outline = DawnBorder,
     error = NetForgeRust,
-    onError = NetForgeChalk
+    onError = androidx.compose.ui.graphics.Color.White
 )
 
 @Composable

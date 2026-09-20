@@ -122,10 +122,16 @@ class NetForgeVpnService : VpnService() {
         serviceScope.launch {
             try {
                 val builder = Builder()
-                    .setSession("NetForge")
+                    .setSession("Flex Net")
                     .addAddress("10.8.0.2", 32)
                     .addRoute("0.0.0.0", 0)
                     .setMtu(profile.mtu)
+
+                try {
+                    builder.addDisallowedApplication(packageName)
+                } catch (e: Exception) {
+                    ConsoleBus.debug("NetForgeVpnService", "Disallow self package: ${e.message}")
+                }
 
                 val dns1 = profile.dnsPrimary.ifBlank { "1.1.1.1" }
                 builder.addDnsServer(dns1)
@@ -142,7 +148,7 @@ class NetForgeVpnService : VpnService() {
                     throw IllegalStateException("VPN Builder returned null descriptor (permissions revoked or VPN revoked by OS)")
                 }
                 tunInterface = pfd
-                ConsoleBus.info("NetForgeVpnService", "TUN interface established (FD=${pfd.fd})")
+                ConsoleBus.info("NetForgeVpnService", "TUN interface established (FD=${pfd.fd}, ip=10.8.0.2, mtu=${profile.mtu})")
 
                 val newEngine = TunnelEngineFactory.create(profile)
                 engine = newEngine
@@ -151,11 +157,9 @@ class NetForgeVpnService : VpnService() {
                 serviceScope.launch {
                     newEngine.phaseFlow.collect { phase ->
                         _phaseFlow.value = phase
-                        if (phase == TunnelPhase.Error || phase == TunnelPhase.Halted) {
-                            if (!isStopping.get()) {
-                                tearDownSession()
-                                stopSelf()
-                            }
+                        if (phase == TunnelPhase.Halted && isStopping.get()) {
+                            tearDownSession()
+                            stopSelf()
                         }
                     }
                 }

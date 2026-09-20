@@ -4,7 +4,20 @@ import com.netforge.app.domain.model.Node
 
 object NodeCatalog {
 
+    val randomNode = Node(
+        id = "node-random-auto",
+        name = "Random Server",
+        countryCode = "AUTO",
+        host = "104.16.132.229",
+        port = 443,
+        flagEmoji = "⚡",
+        latencyMs = 22,
+        isOnline = true,
+        publicKey = ""
+    )
+
     val defaultNodes = listOf(
+        randomNode,
         Node(
             id = "node-us-east",
             name = "USA - Ashburn / New York",

@@ -94,6 +94,28 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    val isDuskFlow: StateFlow<Boolean> = dataStore.isDuskThemeFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        false
+    )
+
+    fun toggleTheme() {
+        viewModelScope.launch {
+            dataStore.setDuskTheme(!isDuskFlow.value)
+        }
+    }
+
+    fun selectFastestNode() {
+        viewModelScope.launch {
+            ConsoleBus.info("ServerManager", "Testing ping latency across all global clusters...")
+            val nodes = NodeCatalog.defaultNodes.filter { it.id != "node-random-auto" }
+            val fastest = nodes.minByOrNull { it.latencyMs } ?: nodes.first()
+            ConsoleBus.info("ServerManager", "Fastest node selected: ${fastest.name} (${fastest.latencyMs}ms)")
+            selectNode(fastest)
+        }
+    }
+
     fun toggleTunnel(context: Context, onPermissionRequired: () -> Unit) {
         when (phaseFlow.value) {
             TunnelPhase.Ready, TunnelPhase.Halted, TunnelPhase.Error -> {

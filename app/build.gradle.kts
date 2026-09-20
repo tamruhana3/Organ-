@@ -17,8 +17,8 @@ android {
     applicationId = "com.aistudio.netforge.cxtrqu"
     minSdk = 24
     targetSdk = 34
-    versionCode = 1
-    versionName = "1.0"
+    versionCode = 37
+    versionName = "1.5"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
