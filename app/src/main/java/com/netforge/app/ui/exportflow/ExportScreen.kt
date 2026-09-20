@@ -56,6 +56,11 @@ fun ExportScreen(
     val limitEnabled by viewModel.limitEnabled.collectAsStateWithLifecycle()
     val maxImports by viewModel.maxImports.collectAsStateWithLifecycle()
 
+    val bannerEnabled by viewModel.bannerEnabled.collectAsStateWithLifecycle()
+    val bannerMessage by viewModel.bannerMessage.collectAsStateWithLifecycle()
+    val bannerButtonLabel by viewModel.bannerButtonLabel.collectAsStateWithLifecycle()
+    val bannerButtonUrl by viewModel.bannerButtonUrl.collectAsStateWithLifecycle()
+
     val exportedBytes by viewModel.exportedBytes.collectAsStateWithLifecycle()
     val sha256Fingerprint by viewModel.sha256Fingerprint.collectAsStateWithLifecycle()
     val isExporting by viewModel.isExporting.collectAsStateWithLifecycle()
@@ -232,6 +237,49 @@ fun ExportScreen(
                     valueRange = 1f..50f,
                     colors = SliderDefaults.colors(thumbColor = NetForgeAccent, activeTrackColor = NetForgeAccent)
                 )
+            }
+
+            ExportSwitchRow(
+                label = "Announcement Banner",
+                description = "Display welcome note, channel link or instructions upon import",
+                checked = bannerEnabled,
+                onCheckedChange = { viewModel.bannerEnabled.value = it }
+            )
+
+            if (bannerEnabled) {
+                OutlinedTextField(
+                    value = bannerMessage,
+                    onValueChange = { viewModel.bannerMessage.value = it },
+                    label = { Text("Banner Announcement Note", color = NetForgeSlate) },
+                    placeholder = { Text("e.g. Welcome to NetForge VIP! Follow @mychannel for updates", color = NetForgeSlate.copy(alpha = 0.5f)) },
+                    colors = customExportFieldColors(),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = bannerButtonLabel,
+                        onValueChange = { viewModel.bannerButtonLabel.value = it },
+                        label = { Text("Action Button", color = NetForgeSlate) },
+                        placeholder = { Text("e.g. Telegram", color = NetForgeSlate.copy(alpha = 0.5f)) },
+                        colors = customExportFieldColors(),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = bannerButtonUrl,
+                        onValueChange = { viewModel.bannerButtonUrl.value = it },
+                        label = { Text("URL Link", color = NetForgeSlate) },
+                        placeholder = { Text("https://...", color = NetForgeSlate.copy(alpha = 0.5f)) },
+                        colors = customExportFieldColors(),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1.5f)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))

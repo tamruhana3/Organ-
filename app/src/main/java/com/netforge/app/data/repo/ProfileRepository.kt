@@ -12,6 +12,10 @@ class ProfileRepository(private val profileDao: ProfileDao) {
         list.map { it.toDomain() }
     }
 
+    suspend fun getAllProfilesOnce(): List<Profile> {
+        return profileDao.getAllProfiles().map { it.toDomain() }
+    }
+
     suspend fun getProfileById(id: Long): Profile? {
         return profileDao.getProfileById(id)?.toDomain()
     }
@@ -45,16 +49,16 @@ class ProfileRepository(private val profileDao: ProfileDao) {
         if (profileDao.getCount() == 0) {
             val defaultProfile = Profile(
                 id = 1L,
-                name = "Axiom Gateway 01",
-                author = "Crafted by Axiom Collective",
-                note = "Primary secure wrapped TLS route with keepalive verification",
-                host = "node-us-east.netforge.internal",
+                name = "USA Fast Gateway (SSL)",
+                author = "NetForge Core",
+                note = "Primary secure SSL/TLS tunnel with SNI spoofing and keepalive verification",
+                host = "104.16.132.229",
                 port = 443,
-                mode = Mode.Wrapped,
+                mode = Mode.SslTunnel,
                 sshUser = "netforge",
                 sshPass = "netforge-demo",
-                sni = "cdn.example.com",
-                frontHost = "cdn.example.com",
+                sni = "cloudflare.com",
+                frontHost = "cloudflare.com",
                 dnsPrimary = "1.1.1.1",
                 dnsSecondary = "1.0.0.1",
                 mtu = 1500,
@@ -62,38 +66,38 @@ class ProfileRepository(private val profileDao: ProfileDao) {
                 enableUdp = true,
                 isFavorite = true
             )
-            val directProfile = Profile(
+            val nlProfile = Profile(
                 id = 2L,
-                name = "Direct TCP Tunnel",
-                author = "Axiom Collective",
-                note = "Raw direct TCP socket forwarding without TLS envelope",
-                host = "node-de-fra.netforge.internal",
-                port = 22,
-                mode = Mode.Direct,
+                name = "Netherlands Amsterdam 01",
+                author = "NetForge Core",
+                note = "High speed Amsterdam tunnel node for streaming and low ping",
+                host = "104.18.25.1",
+                port = 443,
+                mode = Mode.CustomPayload,
                 sshUser = "netforge",
                 sshPass = "netforge-demo",
+                sni = "speedtest.net",
+                payloadTemplate = "CONNECT [host_port] HTTP/1.1[crlf]Host: [host][crlf]User-Agent: [ua][crlf]Connection: Upgrade[crlf]Upgrade: websocket[crlf][crlf]",
                 mtu = 1500,
                 keepalive = 20,
                 enableUdp = true
             )
-            val liveProfile = Profile(
+            val directProfile = Profile(
                 id = 3L,
-                name = "Live WebSocket Stream",
-                author = "Axiom Collective",
-                note = "HTTP Upgrade websocket transport with SSH frames",
-                host = "node-uk-lon.netforge.internal",
+                name = "Direct SSH Node",
+                author = "NetForge Core",
+                note = "Direct TCP SSH socket connection without wrapper",
+                host = "1.1.1.1",
                 port = 443,
-                mode = Mode.Live,
+                mode = Mode.SshDirect,
                 sshUser = "netforge",
                 sshPass = "netforge-demo",
-                sni = "stream.netforge.internal",
-                frontHost = "stream.netforge.internal",
-                mtu = 1420,
+                mtu = 1500,
                 keepalive = 10
             )
             saveProfile(defaultProfile)
+            saveProfile(nlProfile)
             saveProfile(directProfile)
-            saveProfile(liveProfile)
         }
     }
 }

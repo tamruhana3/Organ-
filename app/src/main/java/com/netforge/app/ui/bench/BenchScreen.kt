@@ -22,7 +22,8 @@ fun BenchScreen(
     onNavigateTimekeeper: () -> Unit,
     onNavigateBridge: () -> Unit,
     onNavigateFlowmeter: () -> Unit,
-    onNavigateTraceback: () -> Unit
+    onNavigateTraceback: () -> Unit,
+    onNavigateHostChecker: () -> Unit = {}
 ) {
     Scaffold(
         containerColor = NetForgeInk,
@@ -62,6 +63,14 @@ fun BenchScreen(
                 text = "NETWORK VERIFICATION & TELEMETRY",
                 style = Typography.labelSmall,
                 color = NetForgeSlate
+            )
+
+            BenchCard(
+                title = "Host Checker",
+                description = "Probe bug hosts, test SNI spoofing, inspect HTTP headers, status codes and response latency.",
+                icon = Icons.Default.Language,
+                accentColor = NetForgeAccent,
+                onClick = onNavigateHostChecker
             )
 
             BenchCard(

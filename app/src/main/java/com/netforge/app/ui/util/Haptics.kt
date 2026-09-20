@@ -54,12 +54,18 @@ object Haptics {
         }
     }
 
+    fun selection(context: Context) {
+        light(context)
+    }
+
     fun selection(view: View) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            view.performHapticFeedback(HapticFeedbackConstants.SEGMENT_TICK)
-        } else {
-            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-        }
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                view.performHapticFeedback(HapticFeedbackConstants.SEGMENT_TICK)
+            } else {
+                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+            }
+        } catch (_: Exception) {}
     }
 
     fun success(context: Context) {

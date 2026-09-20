@@ -48,11 +48,20 @@ fun ModePickerSheet(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
+            val primaryModes = listOf(
+                Mode.CustomPayload,
+                Mode.SslTunnel,
+                Mode.SslProxy,
+                Mode.SslHttp,
+                Mode.SlowDns,
+                Mode.SshDirect
+            )
+
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
-                items(Mode.values()) { mode ->
+                items(primaryModes) { mode ->
                     val isSelected = mode == selectedMode
                     val borderColor = if (isSelected) NetForgeAccent else NetForgeBorder
 

@@ -40,6 +40,7 @@ class DirectTunnel(
             try {
                 val sock = Socket()
                 socket = sock
+                com.netforge.app.service.NetForgeVpnService.protectSocket(sock)
                 val startConnect = System.currentTimeMillis()
                 sock.connect(InetSocketAddress(profile.host, profile.port), 10000)
                 sock.tcpNoDelay = true

@@ -43,6 +43,7 @@ fun HomeScreen(
     onNavigateSlowChannel: () -> Unit,
     onNavigateImport: () -> Unit,
     onNavigateAbout: () -> Unit,
+    onNavigateHostChecker: () -> Unit = {},
     onNavigatePayloadEditor: (Long) -> Unit,
     onPermissionRequired: () -> Unit
 ) {
@@ -99,8 +100,12 @@ fun HomeScreen(
                         onNavigateShellAccess = onNavigateShellAccess,
                         onNavigateSlowChannel = onNavigateSlowChannel,
                         onNavigateImport = onNavigateImport,
+                        onNavigateHostChecker = onNavigateHostChecker,
                         onNavigateBench = onNavigateBench,
                         onNavigateAbout = onNavigateAbout,
+                        onOptimizeBattery = {
+                            com.netforge.app.domain.util.BatteryOptimizer.requestIgnoreBatteryOptimizations(context)
+                        },
                         onQuit = {
                             viewModel.stopTunnel(context)
                             (context as? android.app.Activity)?.finish()
@@ -170,7 +175,7 @@ fun HomeScreen(
                     .background(NetForgePaper)
                     .border(1.dp, NetForgeBorder, RoundedCornerShape(16.dp))
                     .clickable {
-                        Haptics.selection(context as android.view.View)
+                        Haptics.selection(context)
                         showNodePicker = true
                     }
                     .padding(16.dp)
@@ -212,7 +217,7 @@ fun HomeScreen(
                     .background(NetForgePaper)
                     .border(1.dp, NetForgeBorder, RoundedCornerShape(16.dp))
                     .clickable {
-                        Haptics.selection(context as android.view.View)
+                        Haptics.selection(context)
                         showModePicker = true
                     }
                     .padding(16.dp)

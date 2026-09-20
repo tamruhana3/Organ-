@@ -29,7 +29,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val selectedNode: StateFlow<Node> = _selectedNode.asStateFlow()
 
     private val _currentProfile = MutableStateFlow(
-        Profile(name = "Axiom Gateway 01", mode = Mode.Wrapped, host = "us-east.netforge.internal")
+        Profile(
+            name = "USA Fast Gateway",
+            mode = Mode.SslTunnel,
+            host = NodeCatalog.defaultNodes.first().host,
+            port = NodeCatalog.defaultNodes.first().port,
+            sni = "cloudflare.com"
+        )
     )
     val currentProfile: StateFlow<Profile> = _currentProfile.asStateFlow()
 

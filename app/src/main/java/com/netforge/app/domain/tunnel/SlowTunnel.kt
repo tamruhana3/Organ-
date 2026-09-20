@@ -42,6 +42,7 @@ class SlowTunnel(
                 val socket = DatagramSocket()
                 socket.soTimeout = 10000
                 udpSocket = socket
+                com.netforge.app.service.NetForgeVpnService.protectSocket(socket)
                 val targetAddr = InetAddress.getByName(profile.host)
                 val targetPort = if (profile.port != 443) profile.port else 53
 

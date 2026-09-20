@@ -4,9 +4,8 @@ import android.os.ParcelFileDescriptor
 import com.netforge.app.domain.model.Metrics
 import com.netforge.app.domain.model.Profile
 import com.netforge.app.domain.model.TunnelPhase
-import com.netforge.app.domain.payload.PayloadContext
-import com.netforge.app.domain.payload.PayloadEngine
 import com.netforge.app.logging.ConsoleBus
+import com.netforge.app.service.NetForgeVpnService
 import com.netforge.app.service.TunForwarder
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,9 +19,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.net.ssl.SNIHostName
 import javax.net.ssl.SSLParameters
 import javax.net.ssl.SSLSocket
-import javax.net.ssl.SSLSocketFactory
 
-class WrappedPlusTunnel(
+class SslProxyTunnel(
     private val profile: Profile
 ) : TunnelEngine {
 
@@ -41,17 +39,34 @@ class WrappedPlusTunnel(
     override fun open(tunFd: ParcelFileDescriptor) {
         if (isRunning.getAndSet(true)) return
         _phaseFlow.value = TunnelPhase.Opening
+
+        val targetProxyHost = profile.proxyHost.ifBlank { profile.host }
+        val targetProxyPort = if (profile.proxyPort > 0) profile.proxyPort else 8080
         val sniHost = if (profile.sni.isNotBlank()) profile.sni else (profile.frontHost.ifBlank { profile.host })
-        ConsoleBus.info("WrappedPlusTunnel", "Connecting TLS with custom payload injection to ${profile.host}:${profile.port}")
+
+        ConsoleBus.info("SslProxyTunnel", "Connecting to Proxy $targetProxyHost:$targetProxyPort -> Target ${profile.host}:${profile.port} (SNI=$sniHost)")
 
         scope.launch {
             try {
-                val factory = SslHelper.trustingSocketFactory
                 val rawSocket = Socket()
-                com.netforge.app.service.NetForgeVpnService.protectSocket(rawSocket)
+                NetForgeVpnService.protectSocket(rawSocket)
                 val t0 = System.currentTimeMillis()
-                rawSocket.connect(InetSocketAddress(profile.host, profile.port), 10000)
+                rawSocket.connect(InetSocketAddress(targetProxyHost, targetProxyPort), 10000)
+                rawSocket.tcpNoDelay = true
 
+                ConsoleBus.info("SslProxyTunnel", "Proxy TCP connected in ${System.currentTimeMillis() - t0}ms, transmitting CONNECT handshake...")
+
+                // Send HTTP CONNECT to Proxy
+                val connectPayload = "CONNECT ${profile.host}:${profile.port} HTTP/1.1\r\nHost: ${profile.host}:${profile.port}\r\nUser-Agent: NetForge/1.0\r\nProxy-Connection: Keep-Alive\r\n\r\n"
+                rawSocket.outputStream.write(connectPayload.toByteArray(Charsets.UTF_8))
+                rawSocket.outputStream.flush()
+
+                // Read Proxy Response
+                val responseLine = readLine(rawSocket.inputStream)
+                ConsoleBus.info("SslProxyTunnel", "Proxy Response: $responseLine")
+
+                // Wrap into SSL over the established proxy tunnel
+                val factory = SslHelper.trustingSocketFactory
                 val ssl = factory.createSocket(rawSocket, profile.host, profile.port, true) as SSLSocket
                 sslSocket = ssl
 
@@ -60,30 +75,14 @@ class WrappedPlusTunnel(
                     params.serverNames = listOf(SNIHostName(sniHost))
                     ssl.sslParameters = params
                 } catch (e: Exception) {
-                    ConsoleBus.debug("WrappedPlusTunnel", "SNI host config: ${e.message}")
+                    ConsoleBus.debug("SslProxyTunnel", "SNI host config: ${e.message}")
                 }
+
+                val tHandshake = System.currentTimeMillis()
                 ssl.startHandshake()
-                val handshakeTime = System.currentTimeMillis() - t0
+                val handshakeTime = System.currentTimeMillis() - tHandshake
                 recordLatency(handshakeTime)
-                ConsoleBus.info("WrappedPlusTunnel", "TLS established in ${handshakeTime}ms")
-
-                // Render and inject payload
-                val ctx = PayloadContext(
-                    host = profile.host,
-                    port = profile.port,
-                    frontHost = profile.frontHost.ifBlank { null },
-                    sshUser = profile.sshUser.ifBlank { null },
-                    sshPass = profile.sshPass.ifBlank { null },
-                    tls = true
-                )
-                val payloadBytes = PayloadEngine.renderToBytes(profile.payloadTemplate, ctx)
-                ConsoleBus.info("WrappedPlusTunnel", "Transmitting custom payload headers (${payloadBytes.size} bytes)")
-                ssl.outputStream.write(payloadBytes)
-                ssl.outputStream.flush()
-
-                // Read HTTP response status line
-                val responseLine = readLine(ssl.inputStream)
-                ConsoleBus.info("WrappedPlusTunnel", "Server Response: $responseLine")
+                ConsoleBus.info("SslProxyTunnel", "SSL/TLS established over Proxy in ${handshakeTime}ms (${ssl.session.cipherSuite})")
 
                 forwarder = TunForwarder(tunFd, profile.mtu) { packet, len ->
                     try {
@@ -108,13 +107,13 @@ class WrappedPlusTunnel(
                         }
                     } catch (e: Exception) {
                         if (isRunning.get()) {
-                            ConsoleBus.debug("WrappedPlusTunnel", "Inbound stream completed: ${e.message}")
+                            ConsoleBus.debug("SslProxyTunnel", "Inbound stream completed: ${e.message}")
                         }
                     }
                 }
 
                 _phaseFlow.value = TunnelPhase.Live
-                ConsoleBus.info("WrappedPlusTunnel", "Wrapped+ tunnel LIVE — traffic streaming")
+                ConsoleBus.info("SslProxyTunnel", "SSL+Proxy Tunnel LIVE — traffic encrypted and forwarded")
 
                 // Metrics loop (500ms)
                 var lastUp = 0L
@@ -136,7 +135,7 @@ class WrappedPlusTunnel(
                     lastTime = now
 
                     val jitter = computeJitter()
-                    val latestPing = latencyHistory.lastOrNull() ?: 38L
+                    val latestPing = latencyHistory.lastOrNull() ?: 45L
 
                     _metricsFlow.value = Metrics(
                         bytesUp = currentUp,
@@ -150,7 +149,7 @@ class WrappedPlusTunnel(
                 }
 
             } catch (e: Exception) {
-                ConsoleBus.error("WrappedPlusTunnel", "Tunnel error: ${e.message}", e.stackTraceToString())
+                ConsoleBus.error("SslProxyTunnel", "SSL+Proxy tunnel error: ${e.message}", e.stackTraceToString())
                 _phaseFlow.value = TunnelPhase.Error
                 close()
             }
@@ -182,7 +181,7 @@ class WrappedPlusTunnel(
 
     override fun close() {
         if (!isRunning.getAndSet(false)) return
-        ConsoleBus.info("WrappedPlusTunnel", "Tearing down Wrapped+ session")
+        ConsoleBus.info("SslProxyTunnel", "Closing SSL+Proxy session")
         try { forwarder?.stop() } catch (_: Exception) {}
         try { sslSocket?.close() } catch (_: Exception) {}
         scope.cancel()

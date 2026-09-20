@@ -18,8 +18,10 @@ fun VaultMenu(
     onNavigateShellAccess: () -> Unit,
     onNavigateSlowChannel: () -> Unit,
     onNavigateImport: () -> Unit,
+    onNavigateHostChecker: () -> Unit,
     onNavigateBench: () -> Unit,
     onNavigateAbout: () -> Unit,
+    onOptimizeBattery: () -> Unit = {},
     onQuit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -42,6 +44,15 @@ fun VaultMenu(
             onDismissRequest = { expanded = false },
             modifier = Modifier.background(NetForgePaper2)
         ) {
+            DropdownMenuItem(
+                text = { Text("Host Checker (Bug / SNI)", color = NetForgeAccent) },
+                onClick = { expanded = false; onNavigateHostChecker() }
+            )
+            DropdownMenuItem(
+                text = { Text("Battery Optimization", color = NetForgeChalk) },
+                onClick = { expanded = false; onOptimizeBattery() }
+            )
+            HorizontalDivider(color = NetForgeBorder)
             DropdownMenuItem(
                 text = { Text("Settings", color = NetForgeChalk) },
                 onClick = { expanded = false; onNavigateSettings() }

@@ -9,6 +9,7 @@ object Routes {
     const val IMPORT_FLOW = "import_flow"
     const val EXPORT_FLOW = "export_flow"
     const val CONSOLE = "console"
+    const val HOST_CHECKER = "host_checker"
     const val BENCH = "bench"
     const val BENCH_WHERE_AM_I = "bench_whereami"
     const val BENCH_PINGLINE = "bench_pingline"

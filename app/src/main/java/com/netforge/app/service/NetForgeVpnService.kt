@@ -33,6 +33,29 @@ class NetForgeVpnService : VpnService() {
         private val _activeProfileFlow = MutableStateFlow<Profile?>(null)
         val activeProfileFlow: StateFlow<Profile?> = _activeProfileFlow.asStateFlow()
 
+        var activeInstance: NetForgeVpnService? = null
+            private set
+
+        fun protectSocket(socket: java.net.Socket?): Boolean {
+            if (socket == null) return false
+            return try {
+                activeInstance?.protect(socket) ?: false
+            } catch (e: Exception) {
+                ConsoleBus.debug("NetForgeVpnService", "protect(Socket) error: ${e.message}")
+                false
+            }
+        }
+
+        fun protectSocket(socket: java.net.DatagramSocket?): Boolean {
+            if (socket == null) return false
+            return try {
+                activeInstance?.protect(socket) ?: false
+            } catch (e: Exception) {
+                ConsoleBus.debug("NetForgeVpnService", "protect(DatagramSocket) error: ${e.message}")
+                false
+            }
+        }
+
         fun start(context: Context, profile: Profile) {
             val intent = Intent(context, NetForgeVpnService::class.java).apply {
                 action = ACTION_START
@@ -60,6 +83,7 @@ class NetForgeVpnService : VpnService() {
 
     override fun onCreate() {
         super.onCreate()
+        activeInstance = this
         ConsoleBus.info("NetForgeVpnService", "Service created")
     }
 
@@ -186,6 +210,9 @@ class NetForgeVpnService : VpnService() {
     override fun onDestroy() {
         tearDownSession()
         serviceScope.cancel()
+        if (activeInstance == this) {
+            activeInstance = null
+        }
         ConsoleBus.info("NetForgeVpnService", "Service destroyed")
         _phaseFlow.value = TunnelPhase.Ready
         super.onDestroy()

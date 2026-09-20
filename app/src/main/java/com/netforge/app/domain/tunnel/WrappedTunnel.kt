@@ -46,8 +46,9 @@ class WrappedTunnel(
 
         scope.launch {
             try {
-                val factory = SSLSocketFactory.getDefault() as SSLSocketFactory
+                val factory = SslHelper.trustingSocketFactory
                 val rawSocket = Socket()
+                com.netforge.app.service.NetForgeVpnService.protectSocket(rawSocket)
                 val t0 = System.currentTimeMillis()
                 rawSocket.connect(InetSocketAddress(profile.host, profile.port), 10000)
 

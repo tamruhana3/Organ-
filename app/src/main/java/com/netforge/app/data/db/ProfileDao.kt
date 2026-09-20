@@ -9,6 +9,9 @@ interface ProfileDao {
     @Query("SELECT * FROM profiles ORDER BY isFavorite DESC, updatedAt DESC")
     fun getAllProfilesFlow(): Flow<List<ProfileEntity>>
 
+    @Query("SELECT * FROM profiles ORDER BY isFavorite DESC, updatedAt DESC")
+    suspend fun getAllProfiles(): List<ProfileEntity>
+
     @Query("SELECT * FROM profiles WHERE id = :id LIMIT 1")
     suspend fun getProfileById(id: Long): ProfileEntity?
 

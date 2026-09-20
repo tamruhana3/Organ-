@@ -82,6 +82,7 @@ fun NetForgeNavHost(
                 onNavigateSlowChannel = { navController.navigate(Routes.SETTINGS_SLOW_CHANNEL) },
                 onNavigateImport = { navController.navigate(Routes.IMPORT_FLOW) },
                 onNavigateAbout = { navController.navigate(Routes.ABOUT) },
+                onNavigateHostChecker = { navController.navigate(Routes.HOST_CHECKER) },
                 onNavigatePayloadEditor = { id -> navController.navigate(Routes.payloadEditor(id)) },
                 onPermissionRequired = {
                     val intent = VpnService.prepare(context)
@@ -179,6 +180,12 @@ fun NetForgeNavHost(
             )
         }
 
+        composable(Routes.HOST_CHECKER) {
+            com.netforge.app.ui.checker.HostCheckerScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         composable(Routes.BENCH) {
             BenchScreen(
                 onNavigateBack = { navController.popBackStack() },
@@ -187,7 +194,8 @@ fun NetForgeNavHost(
                 onNavigateTimekeeper = { navController.navigate(Routes.BENCH_TIMEKEEPER) },
                 onNavigateBridge = { navController.navigate(Routes.BENCH_BRIDGE) },
                 onNavigateFlowmeter = { navController.navigate(Routes.BENCH_FLOWMETER) },
-                onNavigateTraceback = { navController.navigate(Routes.BENCH_TRACEBACK) }
+                onNavigateTraceback = { navController.navigate(Routes.BENCH_TRACEBACK) },
+                onNavigateHostChecker = { navController.navigate(Routes.HOST_CHECKER) }
             )
         }
 
